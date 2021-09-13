@@ -1,12 +1,12 @@
+from product.serializers import CategorySerializer, ProductSerializer
 import product
 from django.http.response import HttpResponse
-from django.views.generic.base import View
 from django.views.generic.detail import DetailView
 from product.models import Category, Product
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 
 # Create your views here.
 class ProductListView(ListView):
@@ -47,24 +47,13 @@ def invalidURL(request):
 # -------------------------------------------------------------------------------------
 # REST APIs
 # -------------------------------------------------------------------------------------
-class ProductSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['productID', 'name', 'desc', 'price', 'status', 'quantity', 'date', 'category']
 
 class ProductViewset(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-# ------------------------------------------------------------------------------------
-class CategorySerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['categoryID', 'name']
-
 class CategoryViewset(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     
-# ------------------------------------------------------------------------------------
 
