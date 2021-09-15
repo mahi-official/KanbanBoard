@@ -67,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
     },
 
     removeButton: {
-        width: '2em',
         marginBottom: '0px',
         alignContent: 'left',
     },
