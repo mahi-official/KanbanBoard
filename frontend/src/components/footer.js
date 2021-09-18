@@ -48,7 +48,7 @@ export default function DefaultFooter() {
 
     return (
         <footer id="footer">
-            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossOrigin="anonymous" />
             <link href="https://use.fontawesome.com/releases/v5.0.4/css/all.css" rel="stylesheet" />
 
             <div className={classes.centerItems + " " + classes.defaultTheme} style={{ paddingTop: '20px', fontWeight: 700 }}>
@@ -58,27 +58,27 @@ export default function DefaultFooter() {
                 <ul className={classes.centerItems + " " + classes.defaultTheme + " " + classes.ul}>
                     <li>
                         <a href="https://facebook.com/" className={classes.a}>
-                            <i class="fab fa-facebook-f"></i>
+                            <i className="fab fa-facebook-f"></i>
                         </a>
                     </li>
                     <li>
                         <a href="https://linkedin.com/" className={classes.a}>
-                            <i class="fab fa-linkedin-in"></i>
+                            <i className="fab fa-linkedin-in"></i>
                         </a>
                     </li>
                     <li>
                         <a href="https://instagram.com/" className={classes.a}>
-                            <i class="fab fa-instagram"></i>
+                            <i className="fab fa-instagram"></i>
                         </a>
                     </li>
                     <li>
                         <a href="https://twitter.com/" className={classes.a}>
-                            <i class="fab fa-twitter"></i>
+                            <i className="fab fa-twitter"></i>
                         </a>
                     </li>
                     <li>
                         <a href="https://reddit.com/" className={classes.a}>
-                            <i class="fab fa-reddit"></i>
+                            <i className="fab fa-reddit"></i>
                         </a>
                     </li>
                 </ul>

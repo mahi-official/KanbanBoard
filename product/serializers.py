@@ -1,13 +1,11 @@
-from product.models import Category, Product
+from product.models import Product
 from rest_framework import serializers
 
 
-class CategorySerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['categoryID', 'name']
-
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
+    #category = CategorySerializer(read_only=True)
+    productImgUrl = serializers.ImageField(max_length=None, allow_empty_file=False, allow_null=True, required=False)
     class Meta:
         model = Product
-        fields = ['productID', 'name', 'desc', 'price', 'status', 'quantity', 'date', 'category']
+        fields = ['id', 'productID', 'productImgUrl', 'name', 'desc', 'price', 'status', 'quantity', 'date', 'category']
+    

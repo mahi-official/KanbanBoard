@@ -37,50 +37,14 @@ class App extends Component {
         super(props);
         this.state = {
             prod: true,
-            activeItem: {
-                productImgUrl: "",
-                name: "",
-                desc: "",
-                price: 0,
-                status: true,
-            },
-            productList: []
+            categoryID: "",
+            categoryName: "",
         };
     }
 
-    async componentDidMount() {
-        try {
-            const res = await fetch('http://localhost:8000/api/products/');
-            const apiResult = await res.json();
-            this.setState({
-                productList: apiResult.results ?? []
-            });
-        } catch (e) {
-            console.log(e);
-        }
+    handleDropdownCallback = (catID, catName) =>{
+        this.setState({categoryID: catID, categoryName: catName});
     }
-    renderItems = () => {
-        const { prod } = this.state;
-        console.log(typeof (this.state.productList), "chocolate", this.state.productList)
-        const newItems = this.state.productList.filter(
-            item => item.status === prod
-        );
-        return newItems.map(item => (
-            <li
-                key={item.productID}
-                className="list-group-item d-flex justify-content-between align-items-center"
-            >
-                <span
-                    className={`product-title mr-2 ${this.state.activeItem.status ? "actice-product" : "inactive-product"
-                        }`}
-                    title={item.desc}
-                >
-                    {item.name}
-                </span>
-            </li>
-        ));
-    };
-
 
     render() {
         const { classes } = this.props;
@@ -90,9 +54,9 @@ class App extends Component {
                 <div className={classes.container}>
                     <div className={classes.mBottomSpace} style={{ float: 'right' }}>
                         <div align='right' className={classes.sBottomSpace + " " + classes.sTopSpace}>Search by Category</div>
-                        <div><CategoryDropdown /> </div>
+                        <div><CategoryDropdown onChange={this.handleDropdownCallback}/> </div>
                     </div>
-                    <ProductTable />
+                    <ProductTable category={this.state.categoryID} categoryName={this.state.categoryName} includeOFS={false}/>
                     <div className={classes.sTopSpace + " " + classes.sBottomSpace + " " + classes.centerItems}>
                         <Paginator />
                     </div>

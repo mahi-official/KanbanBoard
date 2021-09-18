@@ -35,18 +35,42 @@ const BootstrapInput = withStyles((theme) => ({
 }))(InputBase);
 
 class CategoryDropdown extends Component {
+    constructor(props) {
+        super(props);
+        this.state= {
+            selected: null,
+            categoryList: []
+        };
+    }
+
+    async componentDidMount() {
+        try {
+            const res = await fetch('http://127.0.0.1:8000/products-api/categories/');
+            const apiResult = await res.json();
+            this.setState({
+                categoryList: apiResult.results ?? []
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    }
+  
+
+    handleChange = (event) => {
+        this.setState({selected: event.target.value});
+        this.props.onChange(event.target.value, event.target.name);
+    };
 
     render() {
         return (
             <NativeSelect
                 id="select-native"
-                //onChange={handleChange}
+                onChange={this.handleChange.bind(this)}
                 input={<BootstrapInput />}
             >
-                <option aria-label="All" value="All">All</option>
-                <option value={"Categories"}>Cat1</option>
-                <option value={20}>Cat2</option>
-                <option value={30}>Cat3</option>
+            {this.state.categoryList.map((category) => (
+                <option key={category.categoryID} aria-label={category.name} value={category.id}>{category.name}</option>
+            ))}
             </NativeSelect>
         );
     }
