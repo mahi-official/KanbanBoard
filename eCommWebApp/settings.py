@@ -43,8 +43,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'product.apps.ProductConfig',
     'category.apps.CategoryConfig',
-    'cart.apps.CartConfig',
     'user.apps.UserConfig',
+    'payment.apps.PaymentConfig',
+    'paymentCategory.apps.PaymentcategoryConfig',
+    'order.apps.OrderConfig',
+    
 ]
 
 MIDDLEWARE = [
@@ -143,8 +146,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+APPEND_SLASH=False
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -163,4 +165,11 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
 ]
 
-CORS_ORIGIN_ALL_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+  'http://localhost:3000',
+)
+
+AUTH_USER_MODEL = 'user.User'
+
+# AUTHENTICATION_BACKENDS = ('user.backends.EmailBackend',)

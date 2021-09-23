@@ -15,6 +15,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import HistoryIcon from '@material-ui/icons/History';
+import { Link } from 'react-router-dom';
+import Avatar from 'react-avatar';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -85,11 +87,14 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
+// SearchAppBar Function starts   --------------------------------------------------------------------------------------------------
 export default function SearchAppBar() {
     const classes = useStyles();
     const [state, setState] = React.useState({
         profileAnchor: null,
         menuAnchor: null,
+        username: null
     });
 
     const isProfileMenuOpen = Boolean(state.profileAnchor);
@@ -119,8 +124,14 @@ export default function SearchAppBar() {
             open={isProfileMenuOpen}
             onClose={handleProfileMenuClose}
         >
-            <MenuItem onClick={handleProfileMenuClose}>Sign Up</MenuItem>
-            <MenuItem onClick={handleProfileMenuClose}>Sign In</MenuItem>
+            {state.username === null ?
+            <div>
+                <MenuItem component={Link} to={'/signup'}>Sign up</MenuItem>
+                <MenuItem component={Link} to={'/login'}>Sign In</MenuItem>
+            </div>
+            :
+            <MenuItem component={Link} to={'/logout'}>Logout</MenuItem>
+            }
         </Menu>
     );
 
@@ -156,7 +167,6 @@ export default function SearchAppBar() {
     );
 
 
-
     return (
         <div className={classes.grow}>
             <AppBar position="static" className={classes.appBarProps}>
@@ -188,14 +198,15 @@ export default function SearchAppBar() {
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         <CheckoutDrawer />
-                        <IconButton
-                            edge="end"
-                            //aria-controls={menuId}
+                        <IconButton edge="end"
                             aria-haspopup="true"
                             onClick={handleProfileMenuClick}
-                            color="inherit"
-                        >
-                            <AccountCircle />
+                            color="inherit">
+                            {
+                                state.username !== null 
+                                ? <Avatar name={state.username} round={true} size="25" textSizeRatio={2}/> 
+                                : <AccountCircle />  
+                            } 
                         </IconButton>
                     </div>
                 </Toolbar>

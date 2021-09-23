@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import { withStyles } from '@material-ui/core';
+import axios from "axios";
+import { baseURL } from "./../backend";
 
 const BootstrapInput = withStyles((theme) => ({
     input: {
@@ -44,21 +46,25 @@ class CategoryDropdown extends Component {
     }
 
     async componentDidMount() {
-        try {
-            const res = await fetch('http://127.0.0.1:8000/products-api/categories/');
-            const apiResult = await res.json();
-            this.setState({
-                categoryList: apiResult.results ?? []
-            });
-        } catch (e) {
-            console.log(e);
-        }
+        axios.get(`${baseURL}/categories/`)
+        .then((response) => {
+            const result = response.data.results;
+            this.setState({ categoryList: result ?? [] });
+        })
+        .catch((e) => {
+        console.error(e);
+        });
     }
   
 
     handleChange = (event) => {
         this.setState({selected: event.target.value});
-        this.props.onChange(event.target.value, event.target.name);
+        if (event.target.value !== "All"){
+            this.props.onChange(event.target.value);
+        } else{
+            this.props.onChange(null);
+        }
+        
     };
 
     render() {
@@ -68,6 +74,8 @@ class CategoryDropdown extends Component {
                 onChange={this.handleChange.bind(this)}
                 input={<BootstrapInput />}
             >
+            <option key="0" aria-label="All Selected" value="All">All</option>
+            
             {this.state.categoryList.map((category) => (
                 <option key={category.categoryID} aria-label={category.name} value={category.id}>{category.name}</option>
             ))}

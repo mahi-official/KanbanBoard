@@ -8,7 +8,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-
+import axios from "axios";
+import { baseURL, headers } from "./../backend";
 
 const StyledTableCell = withStyles((theme) => ({
     head: {
@@ -48,38 +49,37 @@ export default function ProductTable(props) {
         productList: []
     });
     
+    const getProducts = () =>{
+        if(props.category !== null){
+            axios.get(`${baseURL}/products/?category=${props.category}`)
+            .then((response) => {
+                const result = response.data.results;
+                setState({ productList: result ?? [] });
+                setIsLoading(false);
+            })
+            .catch((e) => {
+            console.error(e);
+            });
+        } else {
+            axios.get(`${baseURL}/products/`, {headers,})
+            .then((response) => {
+                const result = response.data.results;
+                setState({ productList: result ?? [] });
+                setIsLoading(false);
+            })
+            .catch((e) => {
+            console.error(e);
+            });
+        }
+    }
     
     useEffect(() => {
-        async function getProductList() {
-            if (props.category === '5' || props.category === ''){
-                try {
-                    const  res = await fetch('http://localhost:8000/products-api/products/');
-                    const apiResult = await res.json();
-                    setState({
-                        productList: apiResult.results ?? []
-                    });
-                    setIsLoading(false);
-                } catch (e) {
-                    console.log(e);
-                }
-            } else {
-                try {
-                    const  res = await fetch('http://localhost:8000/products-api/'+props.category+'/products');
-                    const apiResult = await res.json();
-                    setState({
-                        productList: apiResult.results ?? []
-                    });
-                    setIsLoading(false);
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-        }
-        getProductList();
-    }, [props.category])
+        getProducts();
+    }, [props.category, setState])
 
-    const handleAddToCart = () => {
-
+    const handleAddToCart = (event) => {
+        console.log(event.target, "cheesy")
+        
     }
 
     if (isLoading) {
@@ -104,7 +104,8 @@ export default function ProductTable(props) {
                             {state.productList.filter(item => item.status !== props.includeOFS).map((row) => (
                                 <StyledTableRow key={row.id}>
                                     <StyledTableCell>
-                                        <img src="https://im.rediff.com/money/2014/aug/27logo-answers8.jpg" alt="product" width='100px' height='100px' />  {/* need to update the src */}
+                                        
+                                        <img src={row.productImgUrl ?? "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"} alt="product" width='100px' height='100px' />
                                     </StyledTableCell>
                                     <StyledTableCell>
                                         {row.name}
@@ -112,13 +113,22 @@ export default function ProductTable(props) {
                                     <StyledTableCell>{row.desc}</StyledTableCell>
                                     <StyledTableCell >$ {row.price}.00</StyledTableCell>
                                     <StyledTableCell>
-                                        <span style={{ borderRadius: "50%", padding: '10px', backgroundColor: 'limegreen', color: 'white' }}>
-                                            {row.status ? "Available" : "Not available"}
-                                        </span>
+                                    {row.status ? 
+                                    <span style={{ borderRadius: "50%", padding: '10px', backgroundColor: 'limegreen', color: 'white' }}>
+                                        Available
+                                    </span>
+                                    :
+                                    <span style={{ borderRadius: "50%", padding: '10px', backgroundColor: 'red', color: 'white' }}>
+                                        Not Available
+                                    </span>
+                                    }
+                                        
                                     </StyledTableCell>
                                     <StyledTableCell>
                                         <Button variant="contained" color="primary"
-                                            onClick = {handleAddToCart}
+                                            value = {row.id}
+                                            onClick = {handleAddToCart.bind(this)}
+                                            disabled={!row.status}
                                             disableElevation style={{ width: '80%' }}>
                                             Add to Cart
                                         </Button>

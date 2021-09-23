@@ -25,6 +25,9 @@ urlpatterns = [
     path('', invalidURL),
     path('api/products/', include('product.urls')),
     path('api/categories/', include('category.urls')),
+    path('api/user/', include('user.urls')),
+    path('api/order/', include('order.urls')),
+    
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('api-auth/', include('rest_framework.urls')),

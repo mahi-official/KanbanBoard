@@ -1,11 +1,10 @@
 import React, { Component } from "react"
-import SearchAppBar from "./components/searchAppBar";
-import ProductTable from "./components/productTable"
+import SearchAppBar from "../components/searchAppBar";
+import ProductTable from "../components/productTable"
 import { withStyles } from '@material-ui/core/styles';
-import Paginator from "./components/paginator";
-import DefaultFooter from "./components/footer";
-import CategoryDropdown from "./components/categoryDropdown";
-
+import Paginator from "../components/paginator";
+import DefaultFooter from "../components/footer";
+import CategoryDropdown from "../components/categoryDropdown";
 
 const useStyles = ({
     container: {
@@ -32,18 +31,19 @@ const useStyles = ({
 
 });
 
-class App extends Component {
+class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            prod: true,
-            categoryID: "",
-            categoryName: "",
+            categoryID: null,
         };
     }
 
-    handleDropdownCallback = (catID, catName) =>{
-        this.setState({categoryID: catID, categoryName: catName});
+    handleDropdownCallback = (catID) =>{
+        this.setState({categoryID: catID});
+    }
+    handleAddButtonCallback = () =>{
+        
     }
 
     render() {
@@ -56,7 +56,7 @@ class App extends Component {
                         <div align='right' className={classes.sBottomSpace + " " + classes.sTopSpace}>Search by Category</div>
                         <div><CategoryDropdown onChange={this.handleDropdownCallback}/> </div>
                     </div>
-                    <ProductTable category={this.state.categoryID} categoryName={this.state.categoryName} includeOFS={false}/>
+                    <ProductTable category={this.state.categoryID} includeOFS={null} onAdd={this.handleAddButtonCallback}/>
                     <div className={classes.sTopSpace + " " + classes.sBottomSpace + " " + classes.centerItems}>
                         <Paginator />
                     </div>
@@ -69,4 +69,4 @@ class App extends Component {
     }
 }
 
-export default withStyles(useStyles, { withTheme: true })(App);
+export default withStyles(useStyles, { withTheme: true })(Home);
