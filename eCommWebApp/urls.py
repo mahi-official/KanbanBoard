@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from product import urls
 from utils import invalidURL
 from django.contrib import admin
 from django.urls import path
@@ -27,7 +28,7 @@ urlpatterns = [
     path('api/categories/', include('category.urls')),
     path('api/user/', include('user.urls')),
     path('api/order/', include('order.urls')),
-    
+    path('api/payment/', include('payment.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('api-auth/', include('rest_framework.urls')),

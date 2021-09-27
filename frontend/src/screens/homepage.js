@@ -36,14 +36,12 @@ class Home extends Component {
         super(props);
         this.state = {
             categoryID: null,
+            cart: [],
         };
     }
 
     handleDropdownCallback = (catID) =>{
         this.setState({categoryID: catID});
-    }
-    handleAddButtonCallback = () =>{
-        
     }
 
     render() {
@@ -56,7 +54,7 @@ class Home extends Component {
                         <div align='right' className={classes.sBottomSpace + " " + classes.sTopSpace}>Search by Category</div>
                         <div><CategoryDropdown onChange={this.handleDropdownCallback}/> </div>
                     </div>
-                    <ProductTable category={this.state.categoryID} includeOFS={null} onAdd={this.handleAddButtonCallback}/>
+                    <ProductTable category={this.state.categoryID} includeOFS={false} />
                     <div className={classes.sTopSpace + " " + classes.sBottomSpace + " " + classes.centerItems}>
                         <Paginator />
                     </div>

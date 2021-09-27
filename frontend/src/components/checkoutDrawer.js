@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -9,6 +9,12 @@ import RemoveIcon from '@material-ui/icons/Remove';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
+import axios from 'axios';
+import { baseURL } from '../backend';
+import { Redirect, useHistory } from 'react-router';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import DropIn from 'braintree-web-drop-in-react';
 
 const useStyles = makeStyles((theme) => ({
     list: {
@@ -110,54 +116,40 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CheckoutDrawer() {
     const classes = useStyles();
-    const [count, setCount] = React.useState(0);
+    
     const [state, setState] = React.useState({
         show: false,
+        cart: [],
+        client: "",
     });
+    const [outOfStock, setOutofStock] = React.useState(false);
+    const [error, setError] = React.useState(null);
+    const [openPaymentDialog, setOpenPaymentDialog] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
 
-    const cartItems = [
-        {
-            _id: '1',
-            name: 'Slim Shirt',
-            category: 'Shirts',
-            image: 'https://im.rediff.com/money/2014/aug/27logo-answers8.jpg',
-            price: 60,
-            brand: ' Nike',
-            quantity: 2,
-            status: true
-        },
-        {
-            _id: '2',
-            name: 'Fit Shirt',
-            category: 'Electronics',
-            image: 'https://im.rediff.com/money/2014/aug/27logo-answers8.jpg',
-            price: 50,
-            brand: ' Nike',
-            quantity: 1,
-            status: true
-        },
-        {
-            _id: '3',
-            name: 'Best Pants',
-            category: 'Pants',
-            image: 'https://im.rediff.com/money/2014/aug/27logo-answers8.jpg',
-            price: 70,
-            brand: ' Nike',
-            quantity: 3,
-            status: false
-        }, {
-            _id: '4',
-            name: 'Best Pants',
-            category: 'Pants',
-            image: 'https://im.rediff.com/money/2014/aug/27logo-answers8.jpg',
-            price: 70,
-            brand: ' Nike',
-            quantity: 5,
-            status: true
-        },
-    ]
+    let history = useHistory();
+    let inst;
 
-
+    const setAuthToken = token => {
+        axios.defaults.xsrfCookieName = 'csrftoken'
+        axios.defaults.xsrfHeaderName = 'x-csrftoken'
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+        }
+        else {
+            delete axios.defaults.headers.common['Authorization'];
+        }
+    }
+    
+    const getAmount = () => {
+        return state.cart.reduce((a, c) => a + c.price * c.pcs, 0);
+    }
+    
+    const handleDialogClose = () => {
+        setLoading(false);
+        setOpenPaymentDialog(false);
+    };
+    
     const toggleDrawer = (currState) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
@@ -165,24 +157,174 @@ export default function CheckoutDrawer() {
         setState({ ...state, show: currState });
     };
 
+    const getCartItems = () => {
+        if (localStorage.getItem("cart")) {
+            setState({ ...state, cart: JSON.parse(localStorage.getItem("cart")) });
+        }
+    }
+
+    const removeCartItem = (id) => {
+        state.cart.forEach((item, idx) => {
+            if (item.id === id) {
+                state.cart.splice(idx, 1);
+            }
+        });
+        localStorage.setItem("cart", JSON.stringify(state.cart));
+        setState({ ...state, cart: state.cart });
+    }
+
+    const increaseQuantity = (id) => {
+        state.cart.forEach(item => {
+            if (item.id === id) {
+                item.pcs += 1;
+            }
+            if (item.pcs > item.quantity) {
+                setOutofStock(true);
+            }
+        });
+        localStorage.setItem("cart", JSON.stringify(state.cart));
+        setState({ ...state, cart: state.cart });
+    }
+
+    const decreaseQuantity = (id) => {
+        state.cart.forEach(item => {
+            if (item.id === id) {
+                item.pcs -= 1;
+            }
+            if (item.pcs <= 0) {
+                removeCartItem(item.id);
+            }
+            if (item.pcs > item.quantity) {
+                setOutofStock(true);
+            }
+        });
+        localStorage.setItem("cart", JSON.stringify(state.cart));
+        setState({ ...state, cart: state.cart });
+    }
+
+    const checkOFS = () => {
+        state.cart.forEach(item => {
+            if (item.pcs > item.quantity) {
+                setOutofStock(true);
+            }
+        });
+    }
+
+    
+    const checkAuthentication = () => {
+        const user = sessionStorage.getItem('user');
+        const token = sessionStorage.getItem("token");
+        if (user && token) return true;
+        else return false;
+    }
+
+    const checkoutCart = async () => {
+        setLoading(true);
+        if (state.cart !== [] && checkAuthentication()) {
+            setAuthToken(sessionStorage.getItem("token"));
+            await axios.get(`${baseURL}/payment/checkout/`)
+                .then(response => {
+                    if (response.data.status === 200) {
+                        setState({...state, client: response.data.client});
+                        setOpenPaymentDialog(true);
+                        setLoading(false);
+                    } else {
+                        setError(response.data.error)
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    if (error.response.status === 400) setError(error.response.data.message);
+                    else setError("Something went wrong. Please try again later.");
+                });
+        } else if (!checkAuthentication()) {
+            history.push("/login");
+        } else {
+            setError("Something went wrong. Please try again later.");
+        }
+    }
+
+    
+    const processTransaction = ()  => {
+        setLoading(true)
+        let nonce;
+        inst.requestPaymentMethod()
+        .then(data =>{
+            nonce = data.nonce;
+        })
+        .catch(e => console.log("Nonce Error", e))
+        axios.post(`${baseURL}/payment/process/`, {
+            paymentNonce: nonce,
+            amount: getAmount(),
+        })
+        .then(response => {
+            if (response.data.status === 200) {
+                console.log(response.data)
+                sessionStorage.setItem("transaction", response.data.transaction);
+                //Add Order Transaction Also here
+                localStorage.setItem("cart", []);
+                history.push("/")
+            } else {
+                setError(response.data.error)
+            }
+        }).catch(error => {
+            console.log(error)
+            if (error.response.status === 400) setError(error.response.data.message);
+            else setError("Something went wrong. Please try again later.");
+        });
+        setLoading(false);
+    }
+
+
+    useEffect(() => {
+        getCartItems();
+    }, [state.show])
+
+
+    useEffect(() => {
+        setOutofStock(false);
+        checkOFS();
+    }, [state])
+
+
+    const paymentDialog = () => {
+        return (
+            <div>
+                <Dialog open={openPaymentDialog} onClose={handleDialogClose}>
+                    <DialogTitle>Enter Card Details</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Your Total Amount is : ${getAmount()}
+                        </DialogContentText>
+                        <DropIn
+                            options={{ authorization: state.client}}
+                            onInstance={(instance) => (inst = instance)}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDialogClose}>Cancel</Button>
+                        <Button onClick={processTransaction} disabled={loading}>Proceed</Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
+        )
+    }
+
     const cartDrawer = () => (
         <div
             className={clsx(classes.list)}
-            onClick={toggleDrawer(false)}
-            onKeyDown={toggleDrawer(false)}
         >
             <div className="cart-list">
                 {
-                    cartItems.length === 0 ?
+                    state.cart.length === 0 ?
                         <div>
                             Cart is empty
                         </div>
                         :
-                        cartItems.map(item =>
-                            <li className={clsx(classes.list)} key={item._id}>
+                        state.cart.map(item =>
+                            <li className={clsx(classes.list)} key={item.id}>
                                 <div className={clsx(classes.cartRow)}>
                                     <div className={clsx(classes.productImage)}>
-                                        <img src={item.image} alt="product" width='100px' height='100px' />
+                                        <img src={item.productImgUrl ?? "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"} alt="product" width='100px' height='100px' />
                                     </div>
                                     <div className={clsx(classes.productDetails)}>
                                         <div className={clsx(classes.productName)}>
@@ -192,25 +334,29 @@ export default function CheckoutDrawer() {
                                             ${item.price}
                                         </div>
                                         <div className={clsx(classes.productState)}>
-                                            {item.status ? "Available" : "Not Available"}
+                                            {item.status && (item.pcs <= item.quantity) ?
+                                                <span style={{ borderRadius: "50%", padding: '7px', backgroundColor: 'limegreen', color: 'white', fontSize: 'x-small' }}>
+                                                    Available
+                                                </span>
+                                                :
+                                                <span style={{ borderRadius: "50%", padding: '10px', backgroundColor: 'red', color: 'white', fontSize: 'x-small' }}>
+                                                    Not Available
+                                                </span>
+                                            }
                                         </div>
                                     </div>
                                     <div className={clsx(classes.productQtyDetails)}>
                                         <ButtonGroup>
                                             <Button
                                                 aria-label="reduce"
-                                                onClick={() => {
-                                                    setCount(Math.max(count - 1, 0));
-                                                }}
+                                                onClick={decreaseQuantity.bind(this, item.id)}
                                             >
                                                 <RemoveIcon fontSize="small" />
                                             </Button>
-                                            <Button variant="outlined">{item.quantity}</Button>
+                                            <Button variant="outlined">{item.pcs}</Button>
                                             <Button
                                                 aria-label="increase"
-                                                onClick={() => {
-                                                    setCount(count + 1);
-                                                }}
+                                                onClick={increaseQuantity.bind(this, item.id)}
                                             >
                                                 <AddIcon fontSize="small" />
                                             </Button>
@@ -222,6 +368,7 @@ export default function CheckoutDrawer() {
                                                 color="default"
                                                 size="small"
                                                 className={classes.button}
+                                                onClick={removeCartItem.bind(this, item.id)}
                                                 startIcon={<DeleteIcon />}
                                             >
                                                 Remove Item
@@ -233,6 +380,7 @@ export default function CheckoutDrawer() {
                         )
                 }
             </div>
+            {error && <><small style={{ color: 'red' }}>{error}</small><br /></>}<br /> 
             <div className="cart-action">
                 <div className={clsx(classes.cartRow)}>
                     <div style={{ width: '100%' }}>
@@ -241,23 +389,24 @@ export default function CheckoutDrawer() {
                         </h3>
                         <div className={clsx(classes.flexDisplay)} style={{ borderBottom: '1px solid #cccccc' }}>
                             <div>Total product count</div>
-                            <div>{cartItems.reduce((a, c) => a + c.quantity, 0)}</div>
+                            <div>{state.cart.reduce((a, c) => a + c.pcs, 0)}</div>
                         </div>
                         <div className={clsx(classes.flexDisplay)}>
                             <div>Total amount</div>
-                            <div>$ {cartItems.reduce((a, c) => a + c.price * c.quantity, 0)}</div>
+                            <div>$ {getAmount()}</div>
                         </div>
                         <div className={clsx(classes.flexDisplay)}>
                             <div>Shipping</div>
-                            <div>{cartItems.reduce((a, c) => a + c.price * c.quantity, 0) > 50 ? "Free" : "$20"}</div>
+                            <div>{state.cart.reduce((a, c) => a + c.price * c.pcs, 0) > 50 ? "Free" : "$20"}</div>
                         </div>
-                        <div class={clsx(classes.checkout)}>
-                            <Button variant="contained" color="primary"
-                                disableElevation style={{ width: '100%' }} disabled={cartItems.length === 0}>
+                        <div className={clsx(classes.checkout)}>
+                            <Button variant="contained" color="primary" onClick={checkoutCart}
+                                disableElevation style={{ width: '100%' }} disabled={state.cart.length === 0 || outOfStock || loading}>
                                 Place Order
                             </Button>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -268,10 +417,13 @@ export default function CheckoutDrawer() {
             {
                 <React.Fragment key='cartPreview'>
                     <IconButton color="inherit" onClick={toggleDrawer(true)}>
-                        <AddShoppingCartIcon />
+                        <Badge badgeContent={state.cart.reduce((a, c) => a + c.pcs, 0)} color="error">
+                            <AddShoppingCartIcon />
+                        </Badge>
                     </IconButton>
                     <Drawer anchor='right' open={state.show} onClose={toggleDrawer(false)} >
                         {cartDrawer()}
+                        {paymentDialog()}
                     </Drawer>
                 </React.Fragment>
             }

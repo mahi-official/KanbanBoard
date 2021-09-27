@@ -14,7 +14,7 @@ const useStyles = makeStyles({
 export default function Paginator() {
     const classes = useStyles();
     const { items } = usePagination({
-        count: 10,
+        count: 3,
     });
 
     return (

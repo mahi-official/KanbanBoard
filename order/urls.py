@@ -1,5 +1,5 @@
 
-from django.urls.conf import include
+from django.urls.conf import include, re_path
 from django.urls import path
 from . import views
 from rest_framework import routers
@@ -10,6 +10,7 @@ router.register(r'', views.OrderViewSet)
 
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('all/', include(router.urls)),
+    re_path('^(?P<uuid>\d+)/all/', views.OrderByUserViewSet),
     path('checkout/', views.placeOrder, name='placeOrder'),
 ]

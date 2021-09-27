@@ -49,7 +49,7 @@ class CategoryDropdown extends Component {
         axios.get(`${baseURL}/categories/`)
         .then((response) => {
             const result = response.data.results;
-            this.setState({ categoryList: result ?? [] });
+            this.setState({...this.state, categoryList: result ?? [] });
         })
         .catch((e) => {
         console.error(e);
@@ -58,7 +58,7 @@ class CategoryDropdown extends Component {
   
 
     handleChange = (event) => {
-        this.setState({selected: event.target.value});
+        this.setState({...this.state, selected: event.target.value});
         if (event.target.value !== "All"){
             this.props.onChange(event.target.value);
         } else{

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -15,8 +15,12 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import HistoryIcon from '@material-ui/icons/History';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useHistory } from 'react-router-dom';
 import Avatar from 'react-avatar';
+import axios from 'axios';
+import { baseURL } from '../backend';
+import { Drawer } from '@material-ui/core';
+import OrderHistory from './orderHistory';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -94,8 +98,9 @@ export default function SearchAppBar() {
     const [state, setState] = React.useState({
         profileAnchor: null,
         menuAnchor: null,
-        username: null
+        user: null,
     });
+    const [error, setError] = useState(null)
 
     const isProfileMenuOpen = Boolean(state.profileAnchor);
     const isMainMenuOpen = Boolean(state.menuAnchor);
@@ -114,6 +119,59 @@ export default function SearchAppBar() {
         setState({ ...state, menuAnchor: null });
     };
 
+    const setAuthToken = token => {
+        axios.defaults.xsrfCookieName = 'csrftoken'
+        axios.defaults.xsrfHeaderName = 'x-csrftoken'
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+        }
+        else {
+            delete axios.defaults.headers.common['Authorization'];
+        }
+    }
+    
+    const handleLogout = () => {
+        setError(null);
+        setAuthToken(sessionStorage.getItem("token"));
+        axios.get(`${baseURL}/user/logout/`)
+            .then(response => {
+            if (response.data.status === 200){
+                removeUserSession();
+            } else{
+                setError(response.data.error)
+            }
+        }).catch(error => {
+            console.log(error)
+            if (error.response.status === 400) setError(error.response.data.message);
+            else setError("Something went wrong. Please try again later.");
+        });
+    }
+
+    const removeUserSession = () => {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        window.location.reload(false);
+    }
+
+    const getUser = () => {
+        const userStr = sessionStorage.getItem('user');
+        if (userStr) return JSON.parse(userStr);
+        else return null;
+    }
+
+    const showOrderHistory = () =>{
+        return (
+            <div>
+                <OrderHistory />
+            </div>
+        )
+    }
+
+    useEffect(() => {
+        setState({...state, user: getUser()});
+    }, [setState])
+
+
     const profileMenu = (
         <Menu
             anchorEl={state.profileAnchor}
@@ -124,13 +182,13 @@ export default function SearchAppBar() {
             open={isProfileMenuOpen}
             onClose={handleProfileMenuClose}
         >
-            {state.username === null ?
+            {state.user === null ?
             <div>
-                <MenuItem component={Link} to={'/signup'}>Sign up</MenuItem>
-                <MenuItem component={Link} to={'/login'}>Sign In</MenuItem>
+                <MenuItem component={Link} to={'/signup/'}>Sign up</MenuItem>
+                <MenuItem component={Link} to={'/login/'}>Sign In</MenuItem>
             </div>
             :
-            <MenuItem component={Link} to={'/logout'}>Logout</MenuItem>
+            <MenuItem component={Link} to={'/'} onClick={handleLogout}>Logout</MenuItem>
             }
         </Menu>
     );
@@ -157,7 +215,7 @@ export default function SearchAppBar() {
                 </ListItemIcon>
                 <ListItemText primary="Profile" />
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={showOrderHistory}>
                 <ListItemIcon>
                     <HistoryIcon fontSize="small" />
                 </ListItemIcon>
@@ -203,8 +261,8 @@ export default function SearchAppBar() {
                             onClick={handleProfileMenuClick}
                             color="inherit">
                             {
-                                state.username !== null 
-                                ? <Avatar name={state.username} round={true} size="25" textSizeRatio={2}/> 
+                                state.user !== null 
+                                ? <Avatar name={state.user.name} round={true} size="25" textSizeRatio={2}/>
                                 : <AccountCircle />  
                             } 
                         </IconButton>
@@ -213,6 +271,7 @@ export default function SearchAppBar() {
             </AppBar>
             {mainMenu}
             {profileMenu}
+            {error && <><small style={{ color: 'red' }}>{error}</small><br /></>}<br />
         </div>
     );
 }

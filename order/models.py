@@ -1,3 +1,4 @@
+from typing import Tuple
 from utils import randomID
 from payment.models import Payment
 from django.db import models
@@ -7,7 +8,7 @@ from user.models import User
 class Order(models.Model):
     orderID =  models.CharField(max_length=32, unique=True, blank=False, null=False)
     userID = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    products = models.CharField(max_length=1000, blank=False, null=False)
+    products = models.CharField(max_length=1000, blank=True, null=True)
     paymentID = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     shipping = models.PositiveIntegerField(default=50, null=False, blank=False)

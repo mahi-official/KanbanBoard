@@ -45,16 +45,14 @@ const useStyles = makeStyles({
 export default function ProductTable(props) {
     const classes = useStyles();
     const [isLoading, setIsLoading] = React.useState(true);
-    const [state, setState] = React.useState({
-        productList: []
-    });
+    const [productList, setProductList] = React.useState([]);
     
     const getProducts = () =>{
         if(props.category !== null){
             axios.get(`${baseURL}/products/?category=${props.category}`)
             .then((response) => {
                 const result = response.data.results;
-                setState({ productList: result ?? [] });
+                setProductList(result ?? []);
                 setIsLoading(false);
             })
             .catch((e) => {
@@ -64,7 +62,7 @@ export default function ProductTable(props) {
             axios.get(`${baseURL}/products/`, {headers,})
             .then((response) => {
                 const result = response.data.results;
-                setState({ productList: result ?? [] });
+                setProductList(result ?? []);
                 setIsLoading(false);
             })
             .catch((e) => {
@@ -75,16 +73,37 @@ export default function ProductTable(props) {
     
     useEffect(() => {
         getProducts();
-    }, [props.category, setState])
+    }, [props.category, setProductList])
 
-    const handleAddToCart = (event) => {
-        console.log(event.target, "cheesy")
+
+    const handleAddToCart = (item) => {
+        const updatedCart = []
+        let cart = []
+        let match = false
         
+        if (typeof window !== undefined){
+            if (localStorage.getItem("cart")){
+                cart = JSON.parse(localStorage.getItem("cart"))
+            }
+        }
+        cart.forEach(product =>{
+            if (product.id === item.id) {
+                product.pcs += 1;
+                match = true
+            } 
+            updatedCart.push(product)
+        });
+        if (!match){
+            item["pcs"]=1
+            updatedCart.push(item)
+        }
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
     }
 
     if (isLoading) {
         return <div>Loading Data</div>
     }
+    
     else {
         return (
             <div>
@@ -101,7 +120,7 @@ export default function ProductTable(props) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {state.productList.filter(item => item.status !== props.includeOFS).map((row) => (
+                            {productList.filter(item => item.status !== props.includeOFS).map((row) => (
                                 <StyledTableRow key={row.id}>
                                     <StyledTableCell>
                                         
@@ -126,8 +145,7 @@ export default function ProductTable(props) {
                                     </StyledTableCell>
                                     <StyledTableCell>
                                         <Button variant="contained" color="primary"
-                                            value = {row.id}
-                                            onClick = {handleAddToCart.bind(this)}
+                                            onClick = {handleAddToCart.bind(this, row)}
                                             disabled={!row.status}
                                             disableElevation style={{ width: '80%' }}>
                                             Add to Cart

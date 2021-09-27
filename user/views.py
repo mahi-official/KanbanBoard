@@ -24,26 +24,29 @@ from django.forms.models import model_to_dict
 def registerUser(request):
     try:
         serializer = UserSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             account = serializer.save()
             account.is_active = True
             account.save()
             token = Token.objects.get_or_create(user=account)[0].key
             
+            user = model_to_dict(account)
+            user.pop('password', None)
+
             return JsonResponse({
-                'status_code': HTTP_200_OK,
-                'token': token
+                'status': HTTP_200_OK,
+                'token': token,
+                'user': user
             })
         else:
             return JsonResponse({
-                'status_code': HTTP_400_BAD_REQUEST,
+                'status': HTTP_400_BAD_REQUEST,
                 'error': serializer.errors
             })
     except Exception as e:
         print(e)
         return JsonResponse({
-                'status_code': HTTP_400_BAD_REQUEST,
+                'status': HTTP_400_BAD_REQUEST,
                 'error': 'Invalid data. Please try again'
             })
 
@@ -58,19 +61,19 @@ def signInUser(request):
 
     if email is None or password is None:
        return JsonResponse({
-            'status_code': HTTP_400_BAD_REQUEST,
+            'status': HTTP_400_BAD_REQUEST,
             'error': 'Both email and password is required.'
         })
     
     if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
         return JsonResponse({
-            'status_code': HTTP_400_BAD_REQUEST,
+            'status': HTTP_400_BAD_REQUEST,
             'error': 'Email address is not valid.'
         })
 
     if len(password) < 5:
         return JsonResponse({
-            'status_code': '400',
+            'status': '400',
             'error': 'Password is too short.'
         })
     
@@ -86,23 +89,23 @@ def signInUser(request):
                 user.pop('password', None)
                 return JsonResponse({
                     'token': token.key,
-                    'status_code': HTTP_200_OK,
+                    'status': HTTP_200_OK,
                     'user': user
                 })
             
             return JsonResponse({
-                    'status_code': HTTP_400_BAD_REQUEST,
+                    'status': HTTP_400_BAD_REQUEST,
                     'error': 'Invalid Credentials.'
                 })
         
         return JsonResponse({
-            'status_code': HTTP_400_BAD_REQUEST,
+            'status': HTTP_400_BAD_REQUEST,
             'error': 'Account not found. Please Sign Up.'
         })
 
     except userModel.DoesNotExist:
         return JsonResponse({
-            'status_code': HTTP_400_BAD_REQUEST,
+            'status': HTTP_400_BAD_REQUEST,
             'error': 'User Model not found. Please contact admin.'
         })
 
@@ -116,8 +119,8 @@ def signOutUser(request):
     logout(request)
     
     return JsonResponse({
-        'status_code': HTTP_200_OK,
-        'error': 'Logged out successfully.'
+        'status': HTTP_200_OK,
+        'message': 'Logged out successfully.'
     })
     
 
