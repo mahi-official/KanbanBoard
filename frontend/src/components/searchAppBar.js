@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { alpha, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import MenuIcon from '@material-ui/icons/Menu';
-import SearchIcon from '@material-ui/icons/Search';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import CheckoutDrawer from './checkoutDrawer';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import { alpha, makeStyles } from '@material-ui/core/styles';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import HistoryIcon from '@material-ui/icons/History';
-import { Link, NavLink, useHistory } from 'react-router-dom';
-import Avatar from 'react-avatar';
+import HomeIcon from '@material-ui/icons/Home';
+import MenuIcon from '@material-ui/icons/Menu';
+import SearchIcon from '@material-ui/icons/Search';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import Avatar from 'react-avatar';
+import { Link } from 'react-router-dom';
 import { baseURL } from '../backend';
-import { Drawer } from '@material-ui/core';
+import CheckoutDrawer from './checkoutDrawer';
 import OrderHistory from './orderHistory';
 
 const useStyles = makeStyles((theme) => ({
@@ -100,7 +99,9 @@ export default function SearchAppBar() {
         menuAnchor: null,
         user: null,
     });
-    const [error, setError] = useState(null)
+    const [error, setError] = useState(null);
+
+    const [open, setOpen] = useState(false);
 
     const isProfileMenuOpen = Boolean(state.profileAnchor);
     const isMainMenuOpen = Boolean(state.menuAnchor);
@@ -159,14 +160,11 @@ export default function SearchAppBar() {
         else return null;
     }
 
-    const showOrderHistory = () =>{
-        return (
-            <div>
-                <OrderHistory />
-            </div>
-        )
-    }
-
+    const orderHistory = (
+        <OrderHistory open={open} onClose={() => setOpen(false)}/>
+    )
+    
+    
     useEffect(() => {
         setState({...state, user: getUser()});
     }, [setState])
@@ -203,7 +201,7 @@ export default function SearchAppBar() {
             open={isMainMenuOpen}
             onClose={handleMainMenuClose}
         >
-            <MenuItem>
+            <MenuItem component={Link} to={'/'}>
                 <ListItemIcon>
                     <HomeIcon fontSize="small" />
                 </ListItemIcon>
@@ -215,8 +213,8 @@ export default function SearchAppBar() {
                 </ListItemIcon>
                 <ListItemText primary="Profile" />
             </MenuItem>
-            <MenuItem onClick={showOrderHistory}>
-                <ListItemIcon>
+            <MenuItem onClick={() => setOpen(true)}>
+                <ListItemIcon >
                     <HistoryIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText primary="My Orders" />
@@ -271,6 +269,7 @@ export default function SearchAppBar() {
             </AppBar>
             {mainMenu}
             {profileMenu}
+            {orderHistory}
             {error && <><small style={{ color: 'red' }}>{error}</small><br /></>}<br />
         </div>
     );

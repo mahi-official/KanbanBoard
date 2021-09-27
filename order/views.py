@@ -35,30 +35,32 @@ def placeOrder(request):
         order = Order(userID=uuid, products=pdts, paymentID=pyid, amount=amnt, shipping=ship, coupon=cupn)
         order.save()
         return JsonResponse({
-            'status_code': HTTP_200_OK,
+            'status': HTTP_200_OK,
             'order': order.orderID
         })
     
     except userModel.DoesNotExist:
         return JsonResponse({
-            'status_code': HTTP_400_BAD_REQUEST,
+            'status': HTTP_400_BAD_REQUEST,
             'error': 'User Model not found. Please contact admin.'
         })
 
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
-    queryset = Order.objects.all().order_by('id')
-
-
-class OrderByUserViewSet(viewsets.ModelViewSet):
-    serializer_class = OrderSerializer
-    
     def get_queryset(self):
-        uuid = self.kwargs['uuid']
-        if uuid:
-            return Order.objects.filter(userID=uuid)
-        return Order.objects.all()
+        user = self.request.user.id
+        return Order.objects.filter(userID=user).order_by('id')
+
+
+# class OrderByUserViewSet(viewsets.ModelViewSet):
+#     serializer_class = OrderSerializer
+    
+#     def get_queryset(self):
+#         uuid = self.kwargs['uuid']
+#         if uuid:
+#             return Order.objects.filter(userID=uuid)
+#         return Order.objects.all()
 
 
     

@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import axios from 'axios';
 import { baseURL } from '../backend';
-import { Redirect, useHistory } from 'react-router';
+import { Box} from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     list: {
@@ -16,8 +16,8 @@ const useStyles = makeStyles((theme) => ({
         border: '1px solid #cccccc',
         display: 'inline-flex',
         margin: '7px',
-        padding: '5px',
-        width: '95%',
+        width: '60%',
+        backgroundColor: 'white'
     },
 
     productImage: {
@@ -33,6 +33,10 @@ const useStyles = makeStyles((theme) => ({
 
     productName: {
         fontWeight: '600',
+        fontFamily: 'sans-serif',
+    },
+    productDesc: {
+        fontWeight: '400',
         fontFamily: 'sans-serif',
     },
 
@@ -104,13 +108,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function OrderHistory() {
+export default function OrderHistory(props) {
     const classes = useStyles();
 
     const [state, setState] = React.useState({
-        show: false,
         order: [],
-        userid: null
     });
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -126,19 +128,6 @@ export default function OrderHistory() {
         }
     }
 
-    const getAmount = () => {
-        return state.order.reduce((a, c) => a + c.price * c.pcs, 0);
-    }
-
-
-    const toggleDrawer = (currState) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-        setState({ ...state, show: currState });
-        setLoading(false);
-    };
-
 
     const checkAuthentication = () => {
         const user = sessionStorage.getItem('user');
@@ -147,25 +136,26 @@ export default function OrderHistory() {
         else return false;
     }
 
-    const getOrderItems = () => {
+    const getOrderItems = async () => {
         setLoading(true);
         setAuthToken(sessionStorage.getItem("token"));
         if (checkAuthentication()) {
-            axios.post(`${baseURL}/order/${state.userid}/all`)
+            await axios.get(`${baseURL}/order/all/`,)
                 .then(response => {
-                    if (response.data.status === 200) {
-
-                        setState({ ...state, order: response.data.results })
+                    if (response.status === 200) {
+                        let result =  response.data.results;
+                        result.forEach(ord => {
+                            ord.products = JSON.parse(ord.products)
+                        });
+                        setState({ ...state, order: result})
                     } else {
                         setError(response.data.error)
                     }
                 }).catch(error => {
                     console.log(error)
-                    if (error.response.status === 400) setError(error.response.data.message);
+                    if (error.response === 400) setError(error.response.data.message);
                     else setError("Something went wrong. Please try again later.");
                 });
-        } else {
-            <Redirect to="/" />
         }
         setLoading(false);
     }
@@ -173,38 +163,84 @@ export default function OrderHistory() {
 
     useEffect(() => {
         getOrderItems();
-    }, [state.show])
+    }, [props.open])
 
 
-    return (
-        <div className={clsx(classes.list)}>
-            <Drawer anchor='left' open={state.show} onClose={toggleDrawer(false)} >
-                {
-                    state.order.length === 0 ?
-                        <div>
-                            No Previous Orders
-                        </div>
-                        :
-                        state.order.map(item =>
-                            <li className={clsx(classes.list)} key={item.id}>
-                                <div className={clsx(classes.cartRow)}>
-                                    <div className={clsx(classes.productImage)}>
-                                        <img src={item.productImgUrl ?? "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"} alt="product" width='100px' height='100px' />
-                                    </div>
-                                    <div className={clsx(classes.productDetails)}>
-                                        <div className={clsx(classes.productName)}>
-                                            {item.name}
+    const listOrder = () => (
+        <div>
+            {
+                checkAuthentication() ?
+                    <Box
+                        sx={{ width: 700, backgroundColor: "aliceblue" }}
+                        role="presentation"
+                        onClick={props.onClose}
+                        onKeyDown={props.onClose}
+                    >
+                    <div>
+                        {state.order.length === 0 ?
+                            <div>
+                                No Previous Orders
+                            </div>
+                            :
+                            state.order.map(placedOrder =>
+                                <div className="order-items" key={placedOrder.id}>
+                                    {placedOrder.products.map(item =>
+                                        <li className={clsx(classes.list)} key={item.id}>
+                                            <div className={clsx(classes.cartRow)}>
+                                                <div className={clsx(classes.productImage)}>
+                                                    <img src={item.productImgUrl ?? "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"} alt="product" width='100px' height='100px' />
+                                                </div>
+                                                <div className={clsx(classes.productDetails)}>
+                                                    <div className={clsx(classes.productName)}>
+                                                        {item.name}
+                                                    </div>
+                                                    <div className={clsx(classes.productDesc)}>
+                                                        {item.desc}
+                                                    </div>
+                                                    <div className={clsx(classes.productPrice)}>
+                                                        ${item.price}
+                                                    </div>
+                                                </div>
+                                                <div className="quantity" style={{
+                                                    width: 70, height: 'fit-content', display: 'flex',
+                                                    position: 'relative', top: 0, right: 0, backgroundColor: 'lightgrey', justifyContent: 'center'
+                                                }}>
+                                                    {item.pcs}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    )}
+                                    <div className="order-summary" style={{ right: 0, textAlign: 'end', marginRight: '10px' }}>
+                                        <div>
+                                            Total Items: {placedOrder.products.reduce((a, c) => a + c.pcs, 0)}
                                         </div>
-                                        <div className={clsx(classes.productPrice)}>
-                                            ${item.price}
+                                        <div>
+                                            Total Amount: ${placedOrder.amount}
                                         </div>
                                     </div>
                                 </div>
-                            </li>
-                        )
-                }
+                            )}
+                        </div>
+                    </Box>
+                    :
+                    <Box
+                        sx={{ width: 700, backgroundColor: "aliceblue" }}
+                        role="presentation"
+                        onClick={props.onClose}
+                        onKeyDown={props.onClose}
+                    >
+                        <div>Please Sign In to view orders</div>
+                    </Box>
+            }
+        </div>
+    );
+
+
+    return (
+        <div >
+            <Drawer anchor='left' open={props.open} onClose={props.onClose} >
+                {listOrder()}
             </Drawer>
-            {error && <><small style={{ color: 'red' }}>{error}</small><br /></>}<br />
         </div>
     );
 }

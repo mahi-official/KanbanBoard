@@ -32,18 +32,7 @@ const StyledTableRow = withStyles((theme) => ({
 }))(TableRow);
 
 
-const useStyles = makeStyles({
-    table: {
-        width: '100%',
-        padding: 0,
-        margin: 0,
-        display: 'table',
-
-    },
-});
-
 export default function ProductTable(props) {
-    const classes = useStyles();
     const [isLoading, setIsLoading] = React.useState(true);
     const [productList, setProductList] = React.useState([]);
     
@@ -108,7 +97,7 @@ export default function ProductTable(props) {
         return (
             <div>
                 <TableContainer component={Paper}>
-                    <Table className={classes.table} aria-label="product0-catalog">
+                    <Table className="product-catalog" aria-label="product0-catalog">
                         <TableHead>
                             <TableRow>
                                 <StyledTableCell component="th" scope="row" align="left">Preview</StyledTableCell>

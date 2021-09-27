@@ -1,14 +1,11 @@
+import { Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import { width } from '@mui/system';
-import { InputLabel, OutlinedInput, TextField } from '@mui/material';
-import { Button, FormControl, FormHelperText } from '@material-ui/core';
-import { useState } from 'react';
 import axios from 'axios';
-import { baseURL } from '../backend';
-import { Redirect } from 'react-router';
+import { useState } from 'react';
 import { useHistory } from "react-router-dom";
+import { baseURL } from '../backend';
 
 
 const useStyles = makeStyles({

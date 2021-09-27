@@ -6,11 +6,10 @@ from rest_framework import routers
 
 
 router = routers.DefaultRouter()
-router.register(r'', views.OrderViewSet)
+router.register(r'', views.OrderViewSet, basename='Order')
 
 
 urlpatterns = [
     path('all/', include(router.urls)),
-    re_path('^(?P<uuid>\d+)/all/', views.OrderByUserViewSet),
     path('checkout/', views.placeOrder, name='placeOrder'),
 ]
