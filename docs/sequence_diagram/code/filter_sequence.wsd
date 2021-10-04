@@ -1,0 +1,34 @@
+@startuml
+
+skinparam {
+	Style strictuml
+	RoundCorner 8
+	Sequence {
+		LifeLineBackgroundColor #FDFDCD
+ 
+		Stereotype {
+			Font {
+				Size 11
+				Style plain
+			}
+		}
+	}
+	DatabaseBorderColor #A80036
+}
+
+actor "User" as User
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+database "DB" as Database
+
+User -> Frontend : Category Filter dropdown selection
+Frontend ++
+Frontend -> Backend++ : Filtered category Request (category=fc)
+Backend -> Database++ : (SELECT * from Products where category=fc)
+return ResultSet
+return ResultSet
+Frontend -> User : Product Catalog with filtered Category
+Frontend --
+
+
+@enduml

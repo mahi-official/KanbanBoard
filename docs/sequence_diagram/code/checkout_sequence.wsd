@@ -1,0 +1,51 @@
+@startuml
+
+skinparam {
+	Style strictuml
+	RoundCorner 8
+	Sequence {
+		LifeLineBackgroundColor #FDFDCD
+		Stereotype {
+			Font {
+				Size 11
+				Style plain
+			}
+		}
+	}
+	DatabaseBorderColor #A80036
+}
+
+actor "User" as User
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+participant "BrainTree Gateway" as Gateway
+database "DB" as Database
+
+User -> Frontend : Checkout Clicked
+Frontend ++
+Frontend -> Frontend : isSignedIn() : False
+return Redirect to Login Screen
+
+
+User -> Frontend : Checkout Clicked
+Frontend ++
+Frontend -> Frontend : isSignedIn() : True
+Frontend -> Backend ++ : Valid User Checkout Request
+Backend -> Gateway ++: generateOTT()
+return Token
+return Response with Token (OK)
+Frontend -> User: Request Payment Details
+User -> Frontend: Card Details Added
+Frontend --> Backend++ : Authorize Purchase Request
+Backend -> Gateway ++: Authorize Card Details
+return Authorized (Accepted)
+Backend -> Backend: isSuccess() : True
+Backend -> Database ++ : Place Order
+Backend -> Database: Generate Invoice
+return Order success response (OK)
+return Success Response (OK)
+Frontend -> User : Order Placed (OK)
+Frontend --
+
+
+@enduml

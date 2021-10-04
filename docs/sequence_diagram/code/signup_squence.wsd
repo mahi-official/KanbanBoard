@@ -1,0 +1,43 @@
+@startuml
+
+skinparam {
+	Style strictuml
+	RoundCorner 8
+	Sequence {
+		LifeLineBackgroundColor #FDFDCD
+ 
+		Stereotype {
+			Font {
+				Size 11
+				Style plain
+			}
+		}
+	}
+	DatabaseBorderColor #A80036
+}
+
+actor "User" as User
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+database "DB" as Database
+
+' valid request '
+User -> Frontend : Signup Request
+Frontend ++
+Frontend -> Backend : Valid Signup Request
+Backend -> Database : User Register Request
+Database --> Backend : Registeration Success Response
+Backend --> Frontend: Registered and logged in with Token (OK)
+Frontend -> User : Registeration Success (OK)
+Frontend --
+
+' invalid request '
+User -> Frontend : Registeration Request
+Frontend ++
+Frontend -> Backend : Invalid Register Request
+Backend -> Backend : Invalid Fields
+Backend --> Frontend: Registeration Failed with Error (ERROR)
+Frontend -> User : Registeration Failure (ERROR)
+Frontend --
+
+@enduml
