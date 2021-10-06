@@ -6,15 +6,21 @@ from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+from django.conf import settings
+
+from order.models import Order
+from payment.models import Payment
+
 # Create your views here.
 gateway = braintree.BraintreeGateway(
-  braintree.Configuration(
-    environment=braintree.Environment.Sandbox,
-    merchant_id='hqjchq47t9nmbpjy',
-    public_key='d3mchgqv4h6bwctr',
-    private_key='68cfc413f9f82a3e1b50b732b88b4a6f'
-  )
+    braintree.Configuration(
+        environment=braintree.Environment.Sandbox,
+        merchant_id= settings.CREDENTIALS.get("braintree_merchant_id"),
+        public_key=settings.CREDENTIALS.get("braintree_public_key"),
+        private_key=settings.CREDENTIALS.get("braintree_private_key"),
+    )
 )
+
 
 @csrf_exempt
 @api_view(["GET"])
@@ -26,6 +32,7 @@ def generate_token(request):
         "client": gateway.client_token.generate(),
     })
 
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
@@ -33,26 +40,27 @@ def process_payment(request):
 
     clientNonce = request.data.get("paymentNonce")
     clientAmount = request.data.get("amount")
-    print(clientNonce, clientAmount)
     if clientNonce and clientAmount:
         result = gateway.transaction.sale({
             "amount": clientAmount,
             "payment_method_nonce": clientNonce,
             "options": {
-            "submit_for_settlement": True
+                "submit_for_settlement": True
             }
         })
 
         if result.is_success:
             transaction = result.transaction
-            print(transaction)
+            trxn = Payment(transactionID=transaction.id,
+                           amount=transaction.amount)
+            trxn.save()
             return JsonResponse({
                 "status": status.HTTP_200_OK,
-                "transaction": transaction,
+                "transaction": transaction.id,
+                "amount": transaction.amount,
             })
-    
+
     return JsonResponse({
         "status": status.HTTP_400_BAD_REQUEST,
         "error": "Transaction Failed. Please try again."
     })
-    

@@ -244,25 +244,30 @@ export default function CheckoutDrawer() {
     }
 
 
-    const processTransaction = () => {
+    const processTransaction = async() => {
         setLoading(true)
         let nonce;
-        inst.requestPaymentMethod()
+        await inst.requestPaymentMethod()
             .then(data => {
                 nonce = data.nonce;
             })
             .catch(e => console.log("Nonce Error", e))
+        
         axios.post(`${baseURL}/payment/process/`, {
             paymentNonce: nonce,
             amount: getAmount(),
         })
             .then(response => {
                 if (response.data.status === 200) {
-                    console.log(response.data)
                     sessionStorage.setItem("transaction", response.data.transaction);
-                    //Add Order Transaction Also here
+                    axios.post(`${baseURL}/order/checkout/`, {
+                        paymentID: response.data.transaction,
+                        amount: response.data.amount,
+                        products: localStorage.getItem("cart"),
+                        shipping: 0,
+                        coupon: "NA",
+                    })
                     localStorage.setItem("cart", []);
-                    history.push("/")
                 } else {
                     setError(response.data.error)
                 }
@@ -271,7 +276,11 @@ export default function CheckoutDrawer() {
                 if (error.response.status === 400) setError(error.response.data.message);
                 else setError("Something went wrong. Please try again later.");
             });
-        setLoading(false);
+        handleDialogClose();
+        setTimeout(() => {
+            setLoading(false);
+            window.location.reload(false)
+        }, 2000);
     }
 
 

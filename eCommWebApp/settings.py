@@ -13,6 +13,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+from utils import get_credentials
+
+#get credentials from environment
+CREDENTIALS = get_credentials()
+
+if not CREDENTIALS:
+    raise Exception("Environment variables not found. Please add the file to run the application")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,12 +29,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9^f%*_23142d058uxj$#01)u!mnrc1t7^+)z#2&%wtfy=o!pyn'
+SECRET_KEY = CREDENTIALS.get("secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = CREDENTIALS.get("debug")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = CREDENTIALS.get("allowed_hosts")
 
 
 # Application definition
@@ -88,11 +96,11 @@ WSGI_APPLICATION = 'eCommWebApp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ecomdb',
-        'USER': 'app_user',
-        'PASSWORD': 'app_user',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': CREDENTIALS.get("db_name"),
+        'USER': CREDENTIALS.get("db_user"),
+        'PASSWORD': CREDENTIALS.get("db_password"),
+        'HOST': CREDENTIALS.get("db_host"),
+        'PORT': CREDENTIALS.get("db_port"),
     }
 }
 

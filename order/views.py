@@ -1,4 +1,6 @@
 import json
+
+from django.db.models.query_utils import Q
 from order.serializers import OrderSerializer
 from order.models import Order
 from django.contrib.auth import get_user_model
@@ -14,6 +16,9 @@ from rest_framework.status import (
     HTTP_200_OK
 )
 from rest_framework import viewsets
+from payment.models import Payment
+
+from user.models import User
 
 
 # Create your views here.
@@ -28,11 +33,13 @@ def placeOrder(request):
         uuid = request.user.id
         pyid = request.data.get("paymentID")
         amnt = request.data.get("amount")
-        pdts = json.dumps(request.data.get("products"))
+        pdts = request.data.get("products")
         ship = request.data.get("shipping")
         cupn = request.data.get("coupon")
 
-        order = Order(userID=uuid, products=pdts, paymentID=pyid, amount=amnt, shipping=ship, coupon=cupn)
+        user = userModel.objects.filter(Q(id__iexact=str(uuid))).distinct().first()
+        payment = Payment.objects.filter(transactionID=pyid).first()
+        order = Order(userID=user, products=pdts, paymentID=payment, amount=amnt, shipping=ship, coupon=cupn)
         order.save()
         return JsonResponse({
             'status': HTTP_200_OK,

@@ -6,7 +6,7 @@ from django.db import models
 class Payment(models.Model):
     paymentID = models.CharField(max_length=32, blank=False, null=False)
     transactionID = models.CharField(max_length=150, blank=True, null=True)
-    amount = models.PositiveIntegerField(default=0, null=False, blank=False)
+    amount = models.CharField(max_length=10, default='0', null=False, blank=False)
     date = models.DateTimeField(auto_now_add=True)
     mode = models.ForeignKey(PaymentCategory, on_delete=models.CASCADE, default=1)
 

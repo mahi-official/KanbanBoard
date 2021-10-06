@@ -143,11 +143,7 @@ export default function OrderHistory(props) {
             await axios.get(`${baseURL}/order/all/`,)
                 .then(response => {
                     if (response.status === 200) {
-                        let result =  response.data.results;
-                        result.forEach(ord => {
-                            ord.products = JSON.parse(ord.products)
-                        });
-                        setState({ ...state, order: result})
+                        setState({ ...state, order: response.data.results});
                     } else {
                         setError(response.data.error)
                     }
@@ -184,7 +180,7 @@ export default function OrderHistory(props) {
                             :
                             state.order.map(placedOrder =>
                                 <div className="order-items" key={placedOrder.id}>
-                                    {placedOrder.products.map(item =>
+                                    {JSON.parse(placedOrder.products).map(item =>
                                         <li className={clsx(classes.list)} key={item.id}>
                                             <div className={clsx(classes.cartRow)}>
                                                 <div className={clsx(classes.productImage)}>
@@ -212,7 +208,7 @@ export default function OrderHistory(props) {
                                     )}
                                     <div className="order-summary" style={{ right: 0, textAlign: 'end', marginRight: '10px' }}>
                                         <div>
-                                            Total Items: {placedOrder.products.reduce((a, c) => a + c.pcs, 0)}
+                                            Total Items: {JSON.parse(placedOrder.products).reduce((a, c) => a + c.pcs, 0)}
                                         </div>
                                         <div>
                                             Total Amount: ${placedOrder.amount}
