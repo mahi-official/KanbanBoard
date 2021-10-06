@@ -1,75 +1,78 @@
 # E-Retail APP
+E-Retail is the online marketplace application for all your daily needs. User can buy the available items till item stock lasts. Currently, only card payments are accepted.
 
-This project was created with the help of [Material UI](https://material-ui.com/) according to this [specsheet](https://drive.google.com/file/d/1X7hsRMtT424uoah7sySdf0ATaszcvYnp/view?usp=sharing).
+# Docs
+Docs folder contains the DB diagram(schema), sequence Diagrams(flow), Technical Document and the Functional Document. You can refer to these docs for better understanding of the application.
 
-## FEATURES
+# Installation Guide
+To run the project locally, you can start with creating the virtual environment.
+- To create the virtual env, run the following command in your terminal:
+```
+python -m venv retail_venv
+```
+- activate the environment from command: `\> retail_venv\Scripts\activate`
 
-The current Features are:
+- create a folder `source` inside `retail_venv` folder and clone the repository in it. 
 
-### `User SignUp and SignIn`
+-  **To run the backend APIs**, go inside the backend folder using command prompt.
 
-A Login and signup form where the user can create an account. Upon successful signup and signin a success or error message is shown.
+    - Make sure to install all the dependencies from the requirements.txt file in your virtual environment using this command:
+        ```
+        python -m pip install -r requirements.txt
+        ```
 
-### `Display the Products in a table with pagination`
+    - Create a `.env` file in the backend folder and add the below mentioned details in it:
+        ```
+        {
+            "debug": true,
+            "allowed_hosts": ["*"],
+            "secret_key": "django_secret_key",
+            "db_name": "your_postgres_db_name",
+            "db_user": "your_postgres_db_user_name",
+            "db_password": "your_postgres_db_user_name",
+            "db_host": "localhost",
+            "db_port": "",
+            "braintree_merchant_id": "sandbox_merchant_id",
+            "braintree_public_key": "sandbox_public_key",
+            "braintree_private_key": "sandbox_private_key"
+        }
+        ```
 
-Displays all the products added in the backend in the Home Page with pagination enabled
+    - run the following commands:
+        ```
+        python manage.py makemigrations
+        python manage.py migrate
+        python manage.py runserver
+        ```
+    Your APIs are now up!
+    You can test the APIs using postman.
 
-### `Filter and search the Displayed Data`
+-  **To run the User Interface**, go inside the frontend folder using another command prompt.
 
-Users can apply filter (according to categories) or search the displayed data (Search as you go)
+    - Make sure to install all the node packages from the package.json file using this command:
+        ```
+        npm install
+        ```
 
-**Note: For the search query to work please remove all filters or select all from the filter list**
+    - run the following command after downloading all the packages:
+        ```
+        npm start
+        ```
+    Your Website is up now!
+    You can view the contents at **`http://localhost:3000`**
 
-### `Add To Cart`
+# Contributing
+We are working on integrating multiple functionalities. If you want to contribute to it, please fork the development branch and create a pull request with changes.
 
-Users can add the product they like to their cart . The badge shown is automatically incremented when a new product is added or the quantity increased when the same product is selected more than once.
+You can contribute in documentation, linting, styling, performance issues.
 
-**Note: You can add products even when you are not signed in**
+Please mark your pull request with others if contributing in any other category from the mentioned above categories.
 
-### `The Cart Drawer`
+# Follow us
+You can reach out to us on below social media platforms:
 
-Users can click on the cart icon to open the cart drawer where users can either change the product quantity or remove the item from the cart entirely. Users are also shown a bill amount which changes dynamically as the user changes the item quantity or removes an item.
-
-### `Place Order`
-
-**Note: User has to be signed in to use this feature**
-
-After user has added products inside the cart they can click on place order and a payment page using [braintree](https://developers.braintreepayments.com/start/overview) is displayed where users can enter the payment details and click Buy Now. Upon successfuly placing an order a success message is shown.
-
-**Note: Use Card `4111 1111 1111 1111` for testing purpose**
-
-### `Orders Page`
-
-**Note: User has to be signed in to use this feature**
-
-After user has successfuly placed their order. User can view their order history through the orders page.
-
-## Known Bugs and Improvement Required
-
-These are some of the bugs users may face while placing the order
-
-### The Payment page not loading
-
-This is a braintree bug [StackOverflow Link](https://stackoverflow.com/questions/68526912/braintree-client-token-generate-method-throws-an-xml-error-inside-django) due to which the Card Payment modal sometimes fails to load and only buy now and cancel buttons are visible
-
-**Note: This issue is now resolved**
-
-### Cart Items are not stored when user signs out and then signs in after a period of time
-
-As the Cart Items are currently stored in localStorage and not in the database they are not stored per user account . So it might be removed if the user signs out and signs back in again.
-
-### Menu Item pops up again after clicking signout
-
-After clicking signout , Menu item showing SignIn and SignUp are open for a brief time
-
-### Cart Drawer has to be closed and opened again after an unsuccessful payment
-
-After the payment has failed . The braintree dropin payment component does not open when clicking place order again. It works when closing the drawer and opening again
-
-### Style Improvements
-
-Some style improvements need to be added.
-
-### Performance Improvements
-
-Performance improvements are required
+<a href=""><img src="https://github.com/aritraroy/social-icons/blob/master/medium-icon.png?raw=true" width="60"></a>
+<a href=""><img src="https://github.com/aritraroy/social-icons/blob/master/twitter-icon.png?raw=true" width="60"></a>
+<a href=""><img src="https://github.com/aritraroy/social-icons/blob/master/linkedin-icon.png?raw=true" width="60"></a>
+<a href=""><img src="https://github.com/aritraroy/social-icons/blob/master/facebook-icon.png?raw=true" width="60"></a>
+<a href=""><img src="https://github.com/aritraroy/social-icons/blob/master/instagram-icon.png?raw=true" width="60"></a>
