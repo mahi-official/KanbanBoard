@@ -11,3 +11,53 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+footer .padding {
+  padding: 2em;
+}
+
+footer .centerItems {
+  display: flex;
+  justify-content: center;
+}
+
+footer .footerSocial {
+  position: relative;
+  margin-top: 20px;
+  display: flex;
+}
+footer .a {
+  margin-right: 5px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 35px;
+  font-size: 16px;
+  color: #14A098;
+}
+footer .a::hover {
+  color: #14A098AA;
+  outline: none;
+  text-decoration: none;
+}
+
+footer .ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+footer .defaultTheme {
+  color: #ffffff;
+  background-color: #14A098;
+}
+
+.product-catalog{
+  width: 90% !important;
+  margin: 3em auto;
+}

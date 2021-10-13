@@ -1,23 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect } from 'react';
 import './App.css';
+import DefaultFooter from './components/Footer';
+import PrimaryAppBar from './components/PrimaryAppBar';
+import { ProductTable } from './components/ProductTable';
+import { getAllProducts, Product } from './services/ProductService';
 
 function App() {
+
+  const [productList, setProductList] = React.useState<Product[]>([]);
+
+  const getProducts = () => {
+    getAllProducts()
+      .then((response: any) => {
+        setProductList(response.products);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  }
+
+  useEffect(() => {
+    getProducts();
+  }, [])
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <PrimaryAppBar/>
+        <ProductTable products={productList} />
+        <DefaultFooter/>
       </header>
     </div>
   );
