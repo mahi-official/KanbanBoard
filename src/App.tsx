@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './App.css';
 import DefaultFooter from './components/Footer';
+import LoginPage from './components/Login';
 import PrimaryAppBar from './components/PrimaryAppBar';
 import { ProductTable } from './components/ProductTable';
 import { getAllProducts, Product } from './services/ProductService';
@@ -26,9 +27,10 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <PrimaryAppBar/>
+        {/* <PrimaryAppBar/>
         <ProductTable products={productList} />
-        <DefaultFooter/>
+        <DefaultFooter/> */}
+        <LoginPage />
       </header>
     </div>
   );
