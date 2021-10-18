@@ -1,0 +1,67 @@
+@startuml
+
+skinparam {
+	Style strictuml
+	RoundCorner 8
+	Sequence {
+		LifeLineBackgroundColor #FDFDCD
+		Stereotype {
+			Font {
+				Size 11
+				Style plain
+			}
+		}
+	}
+	DatabaseBorderColor #A80036
+}
+
+actor "User" as User
+participant "Frontend" as Frontend
+participant "Local Storage" as LocalStorage
+
+User -> Frontend : Increment Quantity
+Frontend ++
+Frontend -> LocalStorage: Fetch Cart
+LocalStorage -> Frontend: Cart Items
+Frontend -> Frontend : ItemInStock() : True -> Increase Product Quantity
+Frontend -> LocalStorage: Save Cart
+return Updated Cart
+
+User -> Frontend : Increment Quantity
+Frontend ++
+Frontend -> LocalStorage: Fetch Cart
+LocalStorage -> Frontend: Cart Items
+Frontend -> Frontend : ItemInStock() : False -> Disable Checkout button
+Frontend -> Frontend : Increase Product Quantity, Change status to Out of Stock
+Frontend -> LocalStorage: Save Cart
+return Updated Cart
+
+
+User -> Frontend : Decrement Quantity
+Frontend ++
+Frontend -> LocalStorage: Fetch Cart
+LocalStorage -> Frontend: Cart Items
+Frontend -> Frontend : ItemInStock() : True -> Decrease Product Quantity
+Frontend -> Frontend : Enable Checkout Button
+Frontend -> LocalStorage: Save Cart
+return Updated Cart
+
+User -> Frontend : Decrement Quantity
+Frontend ++
+Frontend -> LocalStorage: Fetch Cart
+LocalStorage -> Frontend: Cart Items
+Frontend -> Frontend : ItemInStock() : False -> Disable Checkout button
+Frontend -> Frontend : Decrement Product Quantity
+Frontend -> LocalStorage: Save Cart
+return Updated Cart
+
+User -> Frontend : Remove Item
+Frontend ++
+Frontend -> LocalStorage: Fetch Cart
+LocalStorage -> Frontend: Cart Items
+Frontend -> Frontend : Remove Item from cart
+Frontend -> LocalStorage: Save Cart
+return Updated Cart
+
+
+@enduml

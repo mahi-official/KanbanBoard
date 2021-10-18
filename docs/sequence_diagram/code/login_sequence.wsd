@@ -1,0 +1,43 @@
+@startuml
+
+skinparam {
+	Style strictuml
+	RoundCorner 8
+	Sequence {
+		LifeLineBackgroundColor #FDFDCD
+ 
+		Stereotype {
+			Font {
+				Size 11
+				Style plain
+			}
+		}
+	}
+	DatabaseBorderColor #A80036
+}
+
+actor "User" as User
+participant "Frontend" as Frontend
+participant "Backend" as Backend
+database "DB" as Database
+
+User -> Frontend : Login Request
+Frontend ++
+Frontend -> Backend : Valid Authentication Request
+Backend -> Database : Validated Authentication Request
+Database --> Backend : Authentication Success Response
+Backend --> Frontend: Authenticated with Token (OK)
+Frontend -> User : Authentication Success (OK)
+Frontend --
+
+
+User -> Frontend : Login Request
+Frontend ++
+Frontend -> Backend : Invalid Authentication Request
+Backend -> Database : Invalid Request
+Database --> Backend : Authentication Denied Response
+Backend --> Frontend: Access Denied with Error (ERROR)
+Frontend -> User : Authentication Failure (ERROR)
+Frontend --
+
+@enduml
