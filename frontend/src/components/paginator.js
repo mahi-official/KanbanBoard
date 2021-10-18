@@ -1,47 +1,17 @@
-import React from 'react';
-import { usePagination } from '@material-ui/lab/Pagination';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useState } from 'react';
+import { Pagination } from '@mui/material';
 
-const useStyles = makeStyles({
-    ul: {
-        listStyle: 'none',
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-    },
-});
 
-export default function Paginator() {
-    const classes = useStyles();
-    const { items } = usePagination({
-        count: 3,
-    });
+export default function Paginator(props) {
+    const [value, setValue] = useState(1);
+    const count = props.count % props.pageSize === 0 ? Math.floor(props.count / props.pageSize) : Math.floor(props.count / props.pageSize) + 1
+
+    const handlePageClick = (event, value) => {
+        setValue(value);
+        props.callback(value);
+    }
 
     return (
-        <nav>
-            <ul className={classes.ul}>
-                {items.map(({ page, type, selected, ...item }, index) => {
-                    let children = null;
-
-                    if (type === 'start-ellipsis' || type === 'end-ellipsis') {
-                        children = '…';
-                    } else if (type === 'page') {
-                        children = (
-                            <button type="button" style={{ fontWeight: selected ? 'bold' : undefined }} {...item}>
-                                {page}
-                            </button>
-                        );
-                    } else {
-                        children = (
-                            <button type="button" {...item}>
-                                {type}
-                            </button>
-                        );
-                    }
-
-                    return <li key={index}>{children}</li>;
-                })}
-            </ul>
-        </nav>
+        <Pagination count={count} page={value} defaultPage={1} shape="rounded" variant="outlined" onChange={handlePageClick} />
     );
 }

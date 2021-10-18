@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import SearchAppBar from "../components/searchAppBar";
 import ProductTable from "../components/productTable"
 import { withStyles } from '@material-ui/core/styles';
-import Paginator from "../components/paginator";
 import DefaultFooter from "../components/footer";
 import CategoryDropdown from "../components/categoryDropdown";
 
@@ -55,9 +54,6 @@ class Home extends Component {
                         <div><CategoryDropdown onChange={this.handleDropdownCallback} /> </div>
                     </div>
                     <ProductTable category={this.state.categoryID} includeOFS={false} />
-                    <div className={classes.sTopSpace + " " + classes.sBottomSpace + " " + classes.centerItems}>
-                        <Paginator />
-                    </div>
                 </div>
                 <div>
                     <DefaultFooter />

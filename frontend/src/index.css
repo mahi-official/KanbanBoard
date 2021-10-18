@@ -7,7 +7,29 @@ body {
     -moz-osx-font-smoothing: grayscale;
   }
   
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.container {
+      width: 80%;
+      margin: auto;
   }
+.mBottomSpace {
+      margin-bottom: 20px;
+  }
+.sBottomSpace {
+      margin-bottom: 10px;
+  }
+.sTopSpace {
+      margin-top: 10px;
+  }
+.defaultTheme {
+      color: #FFF;
+      background-color: #14A098;
+  }
+.centerItems {
+    display: flex;
+    justify-content: center;
+}
