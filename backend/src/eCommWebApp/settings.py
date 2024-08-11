@@ -169,10 +169,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5
 }
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-]
-
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
   'http://localhost:3000',

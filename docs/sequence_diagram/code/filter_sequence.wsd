@@ -17,7 +17,7 @@ skinparam {
 }
 
 actor "User" as User
-participant "Frontend" as Frontend
+participant "IOT Device" as Frontend
 participant "Backend" as Backend
 database "DB" as Database
 
